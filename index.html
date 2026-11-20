@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>작은 실천, 큰 변화 - Little Steps</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Pretendard & Inter -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background: radial-gradient(circle at top left, #ecfdf5 0%, #f8fafc 45%, #f1f5f9 100%);
+        }
+        /* 스크롤바 숨김 처리 (모바일 앱 느낌) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes pulse-heart {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+        .animate-heart {
+            animation: pulse-heart 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slide-up {
+            from { transform: translateY(24px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-modal {
+            animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mesh-banner {
+            background-color: #059669;
+            background-image: 
+                radial-gradient(at 88% 15%, hsla(158, 82%, 57%, 0.85) 0px, transparent 55%),
+                radial-gradient(at 12% 85%, hsla(172, 78%, 42%, 0.9) 0px, transparent 55%),
+                radial-gradient(at 50% 50%, hsla(160, 84%, 39%, 1) 0px, transparent 80%);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased select-none">
+
+    <!-- 앱 컨테이너 (모바일 뷰 최적화, 데스크탑에서는 중앙 정렬 앱 프레임) -->
+    <div id="app" class="max-w-md mx-auto min-h-screen bg-[#fcfdfd] sm:border-x sm:border-slate-200/70 shadow-[0_20px_50px_rgba(15,23,42,0.06)] flex flex-col relative pb-24">
+
+        <!-- 상단 헤더 -->
+        <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-100/80 px-5 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-50">
+                    <i data-lucide="sprout" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-[17px] font-extrabold tracking-tight text-slate-900 leading-none">작은 실천</h1>
+                        <span class="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[9px] font-extrabold tracking-wide">LIVE</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1 flex items-center gap-1.5">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span>모두의 변화가 실시간 연결됨</span>
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-install-guide" class="w-9 h-9 rounded-2xl bg-slate-50 border border-slate-200/60 text-slate-600 hover:bg-slate-100 flex items-center justify-center active:scale-95 transition" title="홈 화면에 추가">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+                </button>
+                <button id="btn-profile-modal" class="flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 text-xs font-bold border border-emerald-200/60 shadow-2xs active:scale-95 transition">
+                    <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">
+                        <i data-lucide="user" class="w-3 h-3"></i>
+                    </span>
+                    <span id="header-nickname" class="max-w-[82px] truncate">로딩중...</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 실시간 통계 배너 -->
+        <div class="px-5 pt-4">
+            <div class="mesh-banner rounded-[28px] p-5 text-white shadow-xl shadow-emerald-600/20 relative overflow-hidden border border-white/20">
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md text-[11px] font-semibold text-emerald-50 mb-2 border border-white/15">
+                                ✨ 오늘의 실천
+                            </span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span id="total-actions-count" class="text-4xl font-black tracking-tight drop-shadow-xs">0</span>
+                                <span class="text-sm font-medium text-emerald-50">개의 실천이 쌓였어요</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/25 shadow-inner">
+                            <i data-lucide="sparkles" class="w-6 h-6 text-amber-200"></i>
+                        </div>
+                    </div>
+
+                    <!-- 하단 미니 요약 바 -->
+                    <div class="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-xs text-emerald-50">
+                        <span class="flex items-center gap-1.5 font-medium">
+                            <i data-lucide="award" class="w-3.5 h-3.5 text-amber-200"></i>
+                            <span>내 등급 <strong id="my-level-badge" class="text-white font-extrabold">Lv.1</strong></span>
+                            <span class="text-emerald-200/80">·</span>
+                            <span>스탬프 <strong id="my-stamp-count" class="text-amber-200 font-extrabold">0</strong>개</span>
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-black/15 font-bold text-white">
+                            내 기록 <span id="my-actions-count">0</span>개
+                        </span>
+                    </div>
+
+                    <!-- 다음 레벨까지 스탬프 진행률 게이지 -->
+                    <div class="mt-2.5">
+                        <div class="flex justify-between items-center text-[10px] font-semibold text-emerald-100/90 mb-1">
+                            <span>타인의 응원 댓글 1개 = 스탬프 1개</span>
+                            <span id="next-level-hint">다음 레벨까지 10개</span>
+                        </div>
+                        <div class="w-full h-1.5 rounded-full bg-black/20 overflow-hidden">
+                            <div id="level-progress-bar" class="h-full rounded-full bg-gradient-to-r from-amber-200 to-yellow-300 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 배경 빛망울 장식 -->
+                <div class="absolute -right-8 -bottom-10 w-36 h-36 rounded-full bg-white/15 blur-xl"></div>
+                <div class="absolute right-16 -top-10 w-24 h-24 rounded-full bg-teal-200/20 blur-lg"></div>
+            </div>
+        </div>
+
+        <!-- 카테고리 필터 탭 -->
+        <div class="px-5 pt-5 pb-2.5 sticky top-[68px] z-20 bg-[#fcfdfd]/90 backdrop-blur-md">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="category-tabs">
+                <button data-cat="all" class="cat-btn active px-4 py-2 rounded-2xl text-xs font-bold bg-slate-900 text-white shadow-md shadow-slate-900/15 transition-all whitespace-nowrap">
+                    ✨ 전체 피드
+                </button>
+                <button data-cat="eco" class="cat-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/70 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    🌱 환경 보호
+                </button>
+                <button data-cat="growth" class="cat-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/70 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    📚 개인 발전
+                </button>
+                <button data-cat="health" class="cat-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/70 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    💪 건강 습관
+                </button>
+                <button data-cat="kindness" class="cat-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white text-slate-600 border border-slate-200/70 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    💛 작은 친절
+                </button>
+            </div>
+        </div>
+
+        <!-- 피드 리스트 컨테이너 -->
+        <main id="feed-container" class="flex-1 px-5 py-2 space-y-4">
+            <!-- 초기 로딩 스켈레톤 -->
+            <div id="loading-state" class="py-16 flex flex-col items-center justify-center text-slate-400">
+                <div class="w-9 h-9 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p class="text-sm font-semibold text-slate-500">실시간 실천 기록을 불러오고 있어요...</p>
+            </div>
+        </main>
+
+        <!-- 플로팅 액션 버튼 (글쓰기) -->
+        <button id="btn-open-write" class="fixed bottom-6 right-5 md:right-[calc(50%-204px)] z-30 h-14 px-5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-xl shadow-emerald-500/35 flex items-center gap-2 font-bold text-sm active:scale-95 transition-all ring-4 ring-white">
+            <i data-lucide="plus" class="w-5 h-5 stroke-[2.5]"></i>
+            <span>실천 기록</span>
+        </button>
+
+    </div>
+
+    <!-- ================= 모달 영역 ================= -->
+
+    <!-- 1. 실천 기록 작성 모달 -->
+    <div id="write-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="animate-modal bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-6 shadow-2xl border border-slate-100">
+            <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+            <div class="flex justify-between items-center mb-5">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-900">오늘의 작은 실천 기록하기</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">사소한 행동 하나가 멋진 변화의 시작이에요</p>
+                </div>
+                <button id="btn-close-write" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form id="write-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">어떤 분야의 실천인가요?</label>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="category" value="eco" class="peer sr-only" checked>
+                            <div class="p-3 rounded-2xl border-2 border-slate-100 bg-slate-50/50 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/80 text-xs font-bold text-slate-600 peer-checked:text-emerald-800 flex items-center gap-2.5 transition-all">
+                                <span class="text-base">🌱</span> 환경 보호
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="category" value="growth" class="peer sr-only">
+                            <div class="p-3 rounded-2xl border-2 border-slate-100 bg-slate-50/50 peer-checked:border-blue-500 peer-checked:bg-blue-50/80 text-xs font-bold text-slate-600 peer-checked:text-blue-800 flex items-center gap-2.5 transition-all">
+                                <span class="text-base">📚</span> 개인 발전
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="category" value="health" class="peer sr-only">
+                            <div class="p-3 rounded-2xl border-2 border-slate-100 bg-slate-50/50 peer-checked:border-orange-500 peer-checked:bg-orange-50/80 text-xs font-bold text-slate-600 peer-checked:text-orange-800 flex items-center gap-2.5 transition-all">
+                                <span class="text-base">💪</span> 건강 습관
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="category" value="kindness" class="peer sr-only">
+                            <div class="p-3 rounded-2xl border-2 border-slate-100 bg-slate-50/50 peer-checked:border-amber-500 peer-checked:bg-amber-50/80 text-xs font-bold text-slate-600 peer-checked:text-amber-800 flex items-center gap-2.5 transition-all">
+                                <span class="text-base">💛</span> 작은 친절
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">오늘 어떤 일을 해내셨나요?</label>
+                    <textarea id="post-content" rows="3" required maxlength="200" placeholder="예: 카페에서 일회용 컵 대신 텀블러를 사용했어요! 작은 행동이지만 뿌듯하네요." class="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200/80 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white focus:outline-none text-sm leading-relaxed resize-none transition"></textarea>
+                    <div class="text-right text-[11px] font-medium text-slate-400 mt-1"><span id="char-count">0</span>/200</div>
+                </div>
+
+                <button type="submit" id="btn-submit-post" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    실천 공유하고 응원받기
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. 닉네임 변경 및 내 정보 모달 -->
+    <div id="profile-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="animate-modal bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-extrabold text-slate-900">나의 프로필 설정</h3>
+                <button id="btn-close-profile" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">닉네임을 변경하면 이전에 작성한 모든 실천 기록과 댓글의 이름도 함께 업데이트됩니다.</p>
+            <div class="space-y-4">
+                <!-- 내 레벨 & 스탬프 현황 카드 -->
+                <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/60">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
+                            <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+                            현재 실천 레벨: <span id="profile-level-text" class="text-emerald-700">Lv.1</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full bg-white text-emerald-700 text-[11px] font-extrabold border border-emerald-200/70">
+                            스탬프 <span id="profile-stamp-text">0</span>개
+                        </span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-emerald-200/60 overflow-hidden mb-1.5">
+                        <div id="profile-progress-bar" class="h-full rounded-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-[11px] text-emerald-700/80 font-medium">내가 쓴 글에 다른 사람이 응원 댓글 1개를 남길 때마다 스탬프 1개가 적립되고, 10개마다 레벨업합니다!</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">닉네임</label>
+                    <input type="text" id="input-nickname" maxlength="12" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white focus:outline-none text-sm font-bold transition">
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] text-slate-500 break-all">
+                    <span class="font-bold text-slate-700 block mb-0.5">내 고유 동기화 ID:</span>
+                    <span id="display-user-id" class="font-mono text-[10px]">연결 중...</span>
+                </div>
+                <button id="btn-save-nickname" class="w-full py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 shadow-lg shadow-slate-900/15 active:scale-95 transition">
+                    저장 및 일괄 동기화
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 스마트폰 설치 안내 모달 -->
+    <div id="install-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="animate-modal bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-base font-extrabold text-slate-900">스마트폰 앱처럼 설치하기</h3>
+                </div>
+                <button id="btn-close-install" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <p class="font-bold text-slate-800 mb-1">🍎 아이폰 (Safari)</p>
+                    <p>하단 중앙의 <span class="font-bold text-blue-600">공유 버튼(네모 위 화살표)</span>을 누른 후 <span class="font-bold text-slate-800">'홈 화면에 추가'</span>를 선택하세요.</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <p class="font-bold text-slate-800 mb-1">🤖 안드로이드 (Chrome / 삼성인터넷)</p>
+                    <p>우측 상단 <span class="font-bold text-slate-800">메뉴(⋮)</span>를 누른 후 <span class="font-bold text-emerald-600">'홈 화면에 추가'</span> 또는 <span class="font-bold text-emerald-600">'앱 설치'</span>를 누르세요.</p>
+                </div>
+            </div>
+            <button id="btn-confirm-install" class="w-full mt-5 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20">
+                확인했어요
+            </button>
+        </div>
+    </div>
+
+    <!-- 커스텀 토스트 메시지 (alert 대체) -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-300">
+        <div id="toast-msg" class="px-4 py-2.5 rounded-full bg-slate-900/95 text-white text-xs font-bold shadow-xl backdrop-blur-md border border-white/10">
+            알림 메시지
+        </div>
+    </div>
+
+    <!-- Firebase SDK & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase 설정 초기화
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'little-steps-community';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 전역 상태
+        let currentUser = null;
+        let currentNickname = '익명의 실천가';
+        let allPosts = [];
+        let currentCategory = 'all';
+        let lastKnownLevel = null;
+
+        // 사용자별 스탬프(타인이 남긴 응원 댓글 수) 및 레벨 계산
+        function getUserLevelStats(uid) {
+            if (!uid) return { stamps: 0, level: 1, progressStamps: 0, remaining: 10, percent: 0 };
+            let stamps = 0;
+            allPosts.forEach(post => {
+                if (post.authorId === uid && Array.isArray(post.comments)) {
+                    post.comments.forEach(c => {
+                        // 자신이 쓴 댓글 제외
+                        if (c.authorId && c.authorId !== uid) {
+                            stamps += 1;
+                        }
+                    });
+                }
+            });
+            const level = Math.floor(stamps / 10) + 1;
+            const progressStamps = stamps % 10;
+            const remaining = 10 - progressStamps;
+            const percent = (progressStamps / 10) * 100;
+            return { stamps, level, progressStamps, remaining, percent };
+        }
+
+        // 상단 배너 및 프로필 모달의 레벨/스탬프 UI 갱신
+        function updateMyLevelUI() {
+            if (!currentUser) return;
+            const stats = getUserLevelStats(currentUser.uid);
+
+            if (lastKnownLevel !== null && stats.level > lastKnownLevel) {
+                showToast(`🎉 축하합니다! 스탬프 10개를 모아 Lv.${stats.level}로 레벨업했어요!`);
+            }
+            lastKnownLevel = stats.level;
+
+            const levelBadge = document.getElementById('my-level-badge');
+            const stampCount = document.getElementById('my-stamp-count');
+            const nextHint = document.getElementById('next-level-hint');
+            const progressBar = document.getElementById('level-progress-bar');
+
+            if (levelBadge) levelBadge.textContent = `Lv.${stats.level}`;
+            if (stampCount) stampCount.textContent = stats.stamps.toLocaleString();
+            if (nextHint) nextHint.textContent = `다음 레벨까지 ${stats.remaining}개 (${stats.progressStamps}/10)`;
+            if (progressBar) progressBar.style.width = `${stats.percent}%`;
+
+            const profLevel = document.getElementById('profile-level-text');
+            const profStamp = document.getElementById('profile-stamp-text');
+            const profBar = document.getElementById('profile-progress-bar');
+            if (profLevel) profLevel.textContent = `Lv.${stats.level}`;
+            if (profStamp) profStamp.textContent = stats.stamps.toLocaleString();
+            if (profBar) profBar.style.width = `${stats.percent}%`;
+        }
+
+        // 카테고리 메타데이터
+        const CATEGORIES = {
+            eco: {
+                emoji: '🌱',
+                label: '환경 보호',
+                badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/70',
+                placeholder: '예: 카페에서 일회용 컵 대신 텀블러를 사용했어요! 작은 행동이지만 뿌듯하네요.'
+            },
+            growth: {
+                emoji: '📚',
+                label: '개인 발전',
+                badgeClass: 'bg-blue-50 text-blue-700 border-blue-200/70',
+                placeholder: '예: 출근길 지하철에서 스마트폰 대신 책 20페이지를 읽었어요!'
+            },
+            health: {
+                emoji: '💪',
+                label: '건강 습관',
+                badgeClass: 'bg-orange-50 text-orange-700 border-orange-200/70',
+                placeholder: '예: 엘리베이터 대신 5층까지 계단으로 걸어 올라갔어요!'
+            },
+            kindness: {
+                emoji: '💛',
+                label: '작은 친절',
+                badgeClass: 'bg-amber-50 text-amber-700 border-amber-200/70',
+                placeholder: '예: 뒷사람을 위해 건물 출입문을 잠시 잡아주었어요!'
+            }
+        };
+
+        // 칭찬 스탬프 목록
+        const PRAISE_STAMPS = [
+            { id: 'clap', emoji: '👏', label: '대단해요' },
+            { id: 'heart', emoji: '💚', label: '응원해요' },
+            { id: 'fire', emoji: '🔥', label: '멋져요' }
+        ];
+
+        // 유틸리티: 토스트 알림
+        let toastTimer = null;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            if (!toast || !toastMsg) return;
+            toastMsg.textContent = msg;
+            toast.classList.remove('opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        // 유틸리티: 상대 시간 포맷
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return '방금 전';
+            const diff = Math.floor((Date.now() - timestamp) / 1000);
+            if (diff < 60) return '방금 전';
+            if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+            return `${Math.floor(diff / 86400)}일 전`;
+        }
+
+        // 랜덤 기본 닉네임 생성
+        function generateDefaultNickname() {
+            const adjs = ['따뜻한', '부지런한', '푸른', '반짝이는', '다정한', '꾸준한', '씩씩한'];
+            const nouns = ['새싹', '나무', '거북이', '햇살', '바람', '구름', '별빛'];
+            const adj = adjs[Math.floor(Math.random() * adjs.length)];
+            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            const num = Math.floor(100 + Math.random() * 900);
+            return `${adj} ${noun} #${num}`;
+        }
+
+        // 1. 인증 및 실시간 동기화 초기화
+        async function initAuthAndSync() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("인증 오류:", err);
+                showToast("연결 상태를 확인해주세요.");
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) return;
+                currentUser = user;
+                const uidEl = document.getElementById('display-user-id');
+                if (uidEl) uidEl.textContent = user.uid;
+
+                // 사용자 프로필 불러오기 또는 생성
+                const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'info');
+                try {
+                    const snap = await getDoc(profileRef);
+                    if (snap.exists() && snap.data().nickname) {
+                        currentNickname = snap.data().nickname;
+                    } else {
+                        currentNickname = generateDefaultNickname();
+                        await setDoc(profileRef, { nickname: currentNickname, createdAt: Date.now() });
+                    }
+                } catch (e) {
+                    console.error("프로필 로드 실패:", e);
+                }
+                const headerNickEl = document.getElementById('header-nickname');
+                if (headerNickEl) headerNickEl.textContent = currentNickname;
+
+                // 실시간 피드 리스너 시작
+                subscribePosts();
+            });
+        }
+
+        // 2. 실시간 피드 구독
+        function subscribePosts() {
+            const postsCol = collection(db, 'artifacts', appId, 'public', 'data', 'daily_actions');
+            onSnapshot(postsCol, (snapshot) => {
+                const fetched = [];
+                snapshot.forEach(docSnap => {
+                    fetched.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // JS 메모리 내에서 최신순 정렬
+                fetched.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                allPosts = fetched;
+
+                // 전체 실천 수 및 내 실천 수 업데이트
+                document.getElementById('total-actions-count').textContent = allPosts.length.toLocaleString();
+                const myCount = currentUser ? allPosts.filter(p => p.authorId === currentUser.uid).length : 0;
+                const myCountEl = document.getElementById('my-actions-count');
+                if (myCountEl) myCountEl.textContent = myCount.toLocaleString();
+
+                updateMyLevelUI();
+                renderFeed();
+            }, (error) => {
+                console.error("실시간 동기화 오류:", error);
+                showToast("데이터 동기화 중 오류가 발생했습니다.");
+            });
+        }
+
+        // HTML 이스케이프 (XSS 방지)
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, (m) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[m]);
+        }
+
+        // 작성자 이름 기반 파스텔 아바타 색상 생성
+        function getAvatarGradient(name) {
+            const gradients = [
+                'from-emerald-400 to-teal-500',
+                'from-blue-400 to-indigo-500',
+                'from-amber-400 to-orange-500',
+                'from-rose-400 to-pink-500',
+                'from-violet-400 to-purple-500',
+                'from-cyan-400 to-sky-500'
+            ];
+            let hash = 0;
+            const str = name || 'user';
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return gradients[Math.abs(hash) % gradients.length];
+        }
+
+        // 3. 피드 렌더링
+        function renderFeed() {
+            const container = document.getElementById('feed-container');
+            if (!container) return;
+
+            const filtered = currentCategory === 'all'
+                ? allPosts
+                : allPosts.filter(p => p.category === currentCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="py-16 px-6 text-center bg-white rounded-[28px] border border-slate-100 shadow-2xs">
+                        <div class="w-14 h-14 rounded-3xl bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto mb-3 text-2xl">
+                            🌱
+                        </div>
+                        <p class="text-sm font-bold text-slate-700">아직 등록된 실천이 없어요</p>
+                        <p class="text-xs text-slate-400 mt-1">우측 하단 '실천 기록' 버튼을 눌러 첫 번째 주인공이 되어보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(post => {
+                const cat = CATEGORIES[post.category] || CATEGORIES.eco;
+                const isMine = currentUser && post.authorId === currentUser.uid;
+                const authorStats = getUserLevelStats(post.authorId);
+                const otherCommentCount = Array.isArray(post.comments)
+                    ? post.comments.filter(c => c.authorId && c.authorId !== post.authorId).length
+                    : 0;
+                const likes = Array.isArray(post.likes) ? post.likes : [];
+                const isLiked = currentUser && likes.includes(currentUser.uid);
+                const praises = post.praises || {};
+                const comments = Array.isArray(post.comments) ? post.comments : [];
+                const avatarGrad = getAvatarGradient(post.authorName);
+                const initial = (post.authorName || '실').trim().charAt(0);
+
+                // 칭찬 스탬프 HTML
+                const praiseHtml = PRAISE_STAMPS.map(stamp => {
+                    const users = Array.isArray(praises[stamp.id]) ? praises[stamp.id] : [];
+                    const hasStamped = currentUser && users.includes(currentUser.uid);
+                    return `
+                        <button onclick="window.togglePraise('${post.id}', '${stamp.id}')"
+                            class="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition active:scale-95 border ${
+                                hasStamped
+                                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-2xs'
+                                    : 'bg-slate-50/80 border-slate-200/60 text-slate-600 hover:bg-slate-100'
+                            }">
+                            <span>${stamp.emoji}</span>
+                            <span class="text-[11px]">${stamp.label}</span>
+                            ${users.length > 0 ? `<span class="ml-0.5 text-[11px] font-extrabold text-emerald-600">${users.length}</span>` : ''}
+                        </button>
+                    `;
+                }).join('');
+
+                // 댓글 및 대댓글 HTML
+                const commentsHtml = comments.map(c => {
+                    const replies = Array.isArray(c.replies) ? c.replies : [];
+                    const repliesHtml = replies.map(r => `
+                        <div class="mt-2 ml-4 pl-3 border-l-2 border-emerald-200/80 py-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-slate-700">${escapeHTML(r.authorName)}</span>
+                                <span class="text-[10px] text-slate-400">${formatTimeAgo(r.createdAt)}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">${escapeHTML(r.text)}</p>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <div class="p-3 rounded-2xl bg-slate-50/90 border border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-800">${escapeHTML(c.authorName)}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] text-slate-400">${formatTimeAgo(c.createdAt)}</span>
+                                    <button onclick="window.toggleReplyBox('${post.id}', '${c.id}')" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700">
+                                        답글
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">${escapeHTML(c.text)}</p>
+                            ${repliesHtml}
+                            <div id="reply-box-${post.id}-${c.id}" class="hidden mt-2.5 flex gap-1.5">
+                                <input type="text" id="reply-input-${post.id}-${c.id}" maxlength="120" placeholder="따뜻한 답글 남기기..."
+                                    onkeydown="if(event.key==='Enter') window.submitReply('${post.id}', '${c.id}')"
+                                    class="flex-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                                <button onclick="window.submitReply('${post.id}', '${c.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition">
+                                    등록
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <article class="bg-white rounded-[28px] p-5 border border-slate-100/90 shadow-[0_8px_30px_rgba(15,23,42,0.03)] transition-all">
+                        <!-- 카드 상단: 작성자 & 카테고리 -->
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-2xl bg-gradient-to-br ${avatarGrad} text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
+                                    ${escapeHTML(initial)}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-extrabold text-slate-800">${escapeHTML(post.authorName || '익명')}</span>
+                                        <span class="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200/70 text-[9px] font-extrabold">Lv.${authorStats.level}</span>
+                                        ${isMine ? '<span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[9px] font-bold">나</span>' : ''}
+                                    </div>
+                                    <span class="text-[11px] text-slate-400 font-medium">${formatTimeAgo(post.createdAt)}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2.5 py-1 rounded-xl border text-[11px] font-bold ${cat.badgeClass}">
+                                    ${cat.emoji} ${cat.label}
+                                </span>
+                                ${isMine ? `
+                                    <button onclick="window.deletePost('${post.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition" title="삭제">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- 본문 내용 -->
+                        <p class="text-[14px] text-slate-700 leading-relaxed whitespace-pre-line font-medium mb-4">${escapeHTML(post.content)}</p>
+
+                        <!-- 칭찬 스탬프 바 -->
+                        <div class="flex flex-wrap items-center gap-1.5 pb-3.5 border-b border-slate-100">
+                            ${praiseHtml}
+                        </div>
+
+                        <!-- 좋아요 & 댓글 토글 버튼 -->
+                        <div class="pt-3 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-4">
+                                <button onclick="window.toggleLike('${post.id}')" class="flex items-center gap-1.5 font-bold transition active:scale-90 ${isLiked ? 'text-rose-500' : 'text-slate-500 hover:text-rose-500'}">
+                                    <i data-lucide="heart" class="w-4 h-4 ${isLiked ? 'fill-rose-500 animate-heart' : ''}"></i>
+                                    <span>좋아요 ${likes.length}</span>
+                                </button>
+                                <button onclick="window.focusComment('${post.id}')" class="flex items-center gap-1.5 font-bold text-slate-500 hover:text-emerald-600 transition">
+                                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    <span>응원 댓글 ${comments.length}</span>
+                                </button>
+                            </div>
+                            ${otherCommentCount > 0 ? `
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60 text-[10px] font-bold">
+                                    <i data-lucide="award" class="w-3 h-3"></i>
+                                    적립 스탬프 +${otherCommentCount}
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <!-- 댓글 목록 & 입력창 -->
+                        <div class="mt-3 space-y-2">
+                            ${commentsHtml}
+                            <div class="flex gap-2 pt-1">
+                                <input type="text" id="comment-input-${post.id}" maxlength="150" placeholder="따뜻한 칭찬 한마디를 남겨주세요..."
+                                    onkeydown="if(event.key==='Enter') window.submitComment('${post.id}')"
+                                    class="flex-1 px-3.5 py-2 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs focus:bg-white focus:border-emerald-500 focus:outline-none transition">
+                                <button onclick="window.submitComment('${post.id}')" class="px-3.5 py-2 rounded-2xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
+                                    전송
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+
+        // 4. 인터랙션 핸들러 (전역 바인딩)
+        window.toggleLike = async (postId) => {
+            if (!currentUser) return;
+            const post = allPosts.find(p => p.id === postId);
+            if (!post) return;
+            const likes = Array.isArray(post.likes) ? post.likes : [];
+            const isLiked = likes.includes(currentUser.uid);
+            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'daily_actions', postId);
+            try {
+                await updateDoc(postRef, {
+                    likes: isLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
+                });
+            } catch (err) {
+                console.error("좋아요 오류:", err);
+            }
+        };
+
+        window.togglePraise = async (postId, stampId) => {
+            if (!currentUser) return;
+            const post = allPosts.find(p => p.id === postId);
+            if (!post) return;
+            const praises = post.praises || {};
+            const stampUsers = Array.isArray(praises[stampId]) ? praises[stampId] : [];
+            const hasStamped = stampUsers.includes(currentUser.uid);
+            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'daily_actions', postId);
+            try {
+                await updateDoc(postRef, {
+                    [`praises.${stampId}`]: hasStamped ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
+                });
+            } catch (err) {
+                console.error("칭찬 스탬프 오류:", err);
+            }
+        };
+
+        window.focusComment = (postId) => {
+            const input = document.getElementById(`comment-input-${postId}`);
+            if (input) input.focus();
+        };
+
+        window.submitComment = async (postId) => {
+            if (!currentUser) return;
+            const input = document.getElementById(`comment-input-${postId}`);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'daily_actions', postId);
+            const newComment = {
+                id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                authorId: currentUser.uid,
+                authorName: currentNickname,
+                text,
+                createdAt: Date.now(),
+                replies: []
+            };
+            try {
+                await updateDoc(postRef, {
+                    comments: arrayUnion(newComment)
+                });
+                showToast("응원 댓글이 등록되었어요!");
+            } catch (err) {
+                console.error("댓글 등록 오류:", err);
+                showToast("댓글 등록에 실패했습니다.");
+            }
+        };
+
+        window.toggleReplyBox = (postId, commentId) => {
+            const box = document.getElementById(`reply-box-${postId}-${commentId}`);
+            if (!box) return;
+            box.classList.toggle('hidden');
+            if (!box.classList.contains('hidden')) {
+                const input = document.getElementById(`reply-input-${postId}-${commentId}`);
+                if (input) input.focus();
+            }
+        };
+
+        window.submitReply = async (postId, commentId) => {
+            if (!currentUser) return;
+            const input = document.getElementById(`reply-input-${postId}-${commentId}`);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+
+            const post = allPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            input.value = '';
+            const updatedComments = (post.comments || []).map(c => {
+                if (c.id === commentId) {
+                    const replies = Array.isArray(c.replies) ? c.replies : [];
+                    return {
+                        ...c,
+                        replies: [
+                            ...replies,
+                            {
+                                id: 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                                authorId: currentUser.uid,
+                                authorName: currentNickname,
+                                text,
+                                createdAt: Date.now()
+                            }
+                        ]
+                    };
+                }
+                return c;
+            });
+
+            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'daily_actions', postId);
+            try {
+                await updateDoc(postRef, { comments: updatedComments });
+                showToast("답글이 등록되었어요!");
+            } catch (err) {
+                console.error("답글 등록 오류:", err);
+                showToast("답글 등록에 실패했습니다.");
+            }
+        };
+
+        window.deletePost = async (postId) => {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'daily_actions', postId));
+                showToast("실천 기록이 삭제되었습니다.");
+            } catch (err) {
+                console.error("삭제 오류:", err);
+                showToast("삭제 중 오류가 발생했습니다.");
+            }
+        };
+
+        // 5. 닉네임 변경 및 기존 작성 글/댓글/대댓글 일괄 동기화
+        async function updateNicknameEverywhere(newNick) {
+            if (!currentUser || !newNick) return;
+            const btnSave = document.getElementById('btn-save-nickname');
+            if (btnSave) {
+                btnSave.disabled = true;
+                btnSave.textContent = '동기화 중...';
+            }
+
+            try {
+                // 내 프로필 문서 업데이트
+                const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'info');
+                await setDoc(profileRef, { nickname: newNick, updatedAt: Date.now() }, { merge: true });
+
+                // 기존 게시글, 댓글, 대댓글 작성자 이름 일괄 업데이트
+                const batch = writeBatch(db);
+                let hasUpdates = false;
+
+                allPosts.forEach(post => {
+                    let postChanged = false;
+                    const updates = {};
+
+                    if (post.authorId === currentUser.uid && post.authorName !== newNick) {
+                        updates.authorName = newNick;
+                        postChanged = true;
+                    }
+
+                    if (Array.isArray(post.comments) && post.comments.length > 0) {
+                        let commentsChanged = false;
+                        const newComments = post.comments.map(c => {
+                            let cCopy = { ...c };
+                            if (cCopy.authorId === currentUser.uid && cCopy.authorName !== newNick) {
+                                cCopy.authorName = newNick;
+                                commentsChanged = true;
+                            }
+                            if (Array.isArray(cCopy.replies) && cCopy.replies.length > 0) {
+                                let repliesChanged = false;
+                                const newReplies = cCopy.replies.map(r => {
+                                    if (r.authorId === currentUser.uid && r.authorName !== newNick) {
+                                        repliesChanged = true;
+                                        return { ...r, authorName: newNick };
+                                    }
+                                    return r;
+                                });
+                                if (repliesChanged) {
+                                    cCopy.replies = newReplies;
+                                    commentsChanged = true;
+                                }
+                            }
+                            return cCopy;
+                        });
+
+                        if (commentsChanged) {
+                            updates.comments = newComments;
+                            postChanged = true;
+                        }
+                    }
+
+                    if (postChanged) {
+                        const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'daily_actions', post.id);
+                        batch.update(postRef, updates);
+                        hasUpdates = true;
+                    }
+                });
+
+                if (hasUpdates) {
+                    await batch.commit();
+                }
+
+                currentNickname = newNick;
+                document.getElementById('header-nickname').textContent = newNick;
+                document.getElementById('profile-modal').classList.add('hidden');
+                showToast("닉네임과 기존 기록이 모두 동기화되었습니다!");
+            } catch (err) {
+                console.error("닉네임 동기화 오류:", err);
+                showToast("닉네임 변경 중 오류가 발생했습니다.");
+            } finally {
+                if (btnSave) {
+                    btnSave.disabled = false;
+                    btnSave.textContent = '저장 및 일괄 동기화';
+                }
+            }
+        }
+
+        // 6. UI 이벤트 바인딩 및 초기화
+        function setupUIEvents() {
+            // 카테고리 필터 탭
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.cat-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-slate-900', 'text-white', 'shadow-md', 'shadow-slate-900/15', 'font-bold');
+                        b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200/70', 'font-semibold');
+                    });
+                    btn.classList.add('active', 'bg-slate-900', 'text-white', 'shadow-md', 'shadow-slate-900/15', 'font-bold');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200/70', 'font-semibold');
+                    currentCategory = btn.dataset.cat;
+                    renderFeed();
+                });
+            });
+
+            // 글쓰기 모달 열기/닫기
+            const writeModal = document.getElementById('write-modal');
+            const postContent = document.getElementById('post-content');
+            const charCount = document.getElementById('char-count');
+
+            document.getElementById('btn-open-write').addEventListener('click', () => {
+                writeModal.classList.remove('hidden');
+                postContent.focus();
+            });
+            document.getElementById('btn-close-write').addEventListener('click', () => {
+                writeModal.classList.add('hidden');
+            });
+
+            // 카테고리 라디오 변경 시 예시 문구(placeholder) 변경
+            document.querySelectorAll('input[name="category"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const catInfo = CATEGORIES[e.target.value];
+                    if (catInfo && postContent) {
+                        postContent.placeholder = catInfo.placeholder;
+                    }
+                });
+            });
+
+            // 글자수 카운터
+            postContent.addEventListener('input', () => {
+                charCount.textContent = postContent.value.length;
+            });
+
+            // 실천 기록 제출
+            document.getElementById('write-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!currentUser) return;
+                const content = postContent.value.trim();
+                if (!content) return;
+
+                const selectedCat = document.querySelector('input[name="category"]:checked')?.value || 'eco';
+                const submitBtn = document.getElementById('btn-submit-post');
+                submitBtn.disabled = true;
+
+                try {
+                    const postsCol = collection(db, 'artifacts', appId, 'public', 'data', 'daily_actions');
+                    await addDoc(postsCol, {
+                        authorId: currentUser.uid,
+                        authorName: currentNickname,
+                        category: selectedCat,
+                        content,
+                        createdAt: Date.now(),
+                        likes: [],
+                        praises: { clap: [], heart: [], fire: [] },
+                        comments: []
+                    });
+
+                    postContent.value = '';
+                    charCount.textContent = '0';
+                    writeModal.classList.add('hidden');
+                    showToast("오늘의 멋진 실천이 공유되었습니다! 🎉");
+                } catch (err) {
+                    console.error("작성 오류:", err);
+                    showToast("등록에 실패했습니다. 다시 시도해주세요.");
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // 프로필 모달
+            const profileModal = document.getElementById('profile-modal');
+            const inputNickname = document.getElementById('input-nickname');
+            document.getElementById('btn-profile-modal').addEventListener('click', () => {
+                inputNickname.value = currentNickname;
+                profileModal.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-profile').addEventListener('click', () => {
+                profileModal.classList.add('hidden');
+            });
+            document.getElementById('btn-save-nickname').addEventListener('click', () => {
+                const newNick = inputNickname.value.trim();
+                if (!newNick) {
+                    showToast("닉네임을 입력해주세요.");
+                    return;
+                }
+                updateNicknameEverywhere(newNick);
+            });
+
+            // 설치 안내 모달
+            const installModal = document.getElementById('install-modal');
+            document.getElementById('btn-install-guide').addEventListener('click', () => {
+                installModal.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-install').addEventListener('click', () => {
+                installModal.classList.add('hidden');
+            });
+            document.getElementById('btn-confirm-install').addEventListener('click', () => {
+                installModal.classList.add('hidden');
+            });
+        }
+
+        // 앱 시작
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            setupUIEvents();
+            initAuthAndSync();
+        });
+    </script>
+</body>
+</html>
